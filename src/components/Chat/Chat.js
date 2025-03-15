@@ -20,9 +20,8 @@ const Chat = ({ location }) => {
 
   useEffect(() => {
     const { name, room } = queryString.parse(location.search);
-
     socket = io(ENDPOINT);
-
+    
     setRoom(room);
     setName(name);
 
@@ -42,7 +41,7 @@ const Chat = ({ location }) => {
     socket.on("roomData", ({ users }) => {
       setUsers(users);
     });
-}, []);
+  }, []);
 
   const sendMessage = (event) => {
     event.preventDefault();
@@ -51,6 +50,14 @@ const Chat = ({ location }) => {
       socket.emit('sendMessage', message, () => setMessage(''));
     }
   }
+
+  // Add status listener
+  useEffect(() => {
+    socket.on('user status', ({ user, status }) => {
+      // Update user status in the UI
+    });
+  }, []);
+
 
   return (
     <div className="outerContainer">
