@@ -10,9 +10,8 @@ import Input from '../Input/Input';
 import './Chat.css';
 
 const ENDPOINT = process.env.REACT_APP_API_ENDPOINT || 'http://localhost:5000/';
-
+let socket;
 const Chat = ({ location }) => {
-  const [socket, setSocket] = useState(null);
   const [name, setName] = useState('');
   const [room, setRoom] = useState('');
   const [users, setUsers] = useState('');
@@ -22,23 +21,17 @@ const Chat = ({ location }) => {
   useEffect(() => {
     const { name, room } = queryString.parse(location.search);
 
-    const newSocket = io(ENDPOINT);
-    setSocket(newSocket);
+    socket = io(ENDPOINT);
 
     setRoom(room);
     setName(name);
 
-    newSocket.emit('join', { name, room }, (error) => {
+    socket.emit('join', { name, room }, (error) => {
       if(error) {
         alert(error);
       }
     });
 
-    // Cleanup on unmount
-    return () => {
-      newSocket.emit('disconnect');
-      newSocket.off();
-    }
   }, [ENDPOINT, location.search]);
   
   useEffect(() => {
