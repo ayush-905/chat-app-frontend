@@ -9,11 +9,10 @@ import Input from '../Input/Input';
 
 import './Chat.css';
 
-const ENDPOINT = 'https://chat-app-backend-k23e.onrender.com/';
-
-let socket;
+const ENDPOINT = process.env.REACT_APP_API_ENDPOINT || 'http://localhost:5000/';
 
 const Chat = ({ location }) => {
+  const [socket, setSocket] = useState(null);
   const [name, setName] = useState('');
   const [room, setRoom] = useState('');
   const [users, setUsers] = useState('');
@@ -23,16 +22,23 @@ const Chat = ({ location }) => {
   useEffect(() => {
     const { name, room } = queryString.parse(location.search);
 
-    socket = io(ENDPOINT);
+    const newSocket = io(ENDPOINT);
+    setSocket(newSocket);
 
     setRoom(room);
     setName(name);
 
-    socket.emit('join', { name, room }, (error) => {
+    newSocket.emit('join', { name, room }, (error) => {
       if(error) {
         alert(error);
       }
     });
+
+    // Cleanup on unmount
+    return () => {
+      newSocket.emit('disconnect');
+      newSocket.off();
+    }
   }, [ENDPOINT, location.search]);
   
   useEffect(() => {
